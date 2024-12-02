@@ -15,6 +15,9 @@ import numpy as np
 from collections import defaultdict, Counter
 from sklearn.model_selection import train_test_split
 from scipy.sparse import csr_matrix
+import matplotlib.pyplot as plt
+from nltk.stem import WordNetLemmatizer
+kValues= [9,10,11,12,13,14]
 # stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french'))
 # englishWords = set(nltk.corpus.words.words())
 # filename = "MLT/cwk/text8"
@@ -69,14 +72,22 @@ for word, neighbors in co_occurrences.items():
 
 # Create a DataFrame for better readability
 co_matrix_df = pd.DataFrame(co_matrix, index=unique_words, columns=unique_words)
+print("Splitting into training and validation")
 train_validation_set, test_set = train_test_split(co_matrix_df, test_size=0.2, random_state=7)
 train_set, validation_set = train_test_split(train_validation_set, test_size=0.2, random_state=7)
-km = KMeans(n_clusters=5)
-km.fit(train_set)
-labels = km.labels_
-print(set(labels))
-new_labels = km.predict(validation_set)
-silhouette_avg = silhouette_score(validation_set, new_labels)
-print("Silhouette av", silhouette_avg)
-
-#TODO: WHAT IF WE USED A SYMMETRIC MATRIX
+silhoutteScores = []
+for k in kValues:
+    print("Trying with value", k)
+    km = KMeans(n_clusters=k, random_state=42)
+    km.fit(train_set)
+    labels = km.labels_
+    print(set(labels))
+    new_labels = km.predict(validation_set)
+    silhouette_val = silhouette_score(validation_set, new_labels)
+    print("Silhouette score", silhouette_val)
+    silhoutteScores.append(silhouette_val)
+plt.plot(kValues,silhoutteScores)
+plt.title("Silhoutte scores")
+plt.xlabel("K value")
+plt.ylabel("Silhoutte score")
+plt.show()
