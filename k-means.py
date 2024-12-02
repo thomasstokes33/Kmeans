@@ -46,18 +46,18 @@ for word in words:
 words = [w for w in words if frequency[w] >= 10 and frequency[w] < 5000 and len(word) > 2]
 # Create a list of unique words
 print("words size" , len(words))
-unique_words = list(set(words))
-print ("unique words size", len(unique_words))
 
 #https://www.geeksforgeeks.org/co-occurence-matrix-in-nlp/
 #Let's build cooccurrence counts
 window_size = 2 #How many words in sequence to consider to be in the window (either side)
 # Create a list of co-occurring word pairs
 co_occurrences = defaultdict(Counter) # creates dict with default value as a Counter.
-for i, word in enumerate(unique_words):
-    for j in range(max(0, i - window_size), min(len(unique_words), i + window_size + 1)):
+for i, word in enumerate(words):
+    for j in range(max(0, i - window_size), min(len(words), i + window_size + 1)):
         if i != j:
-            co_occurrences[word][unique_words[j]] += 1
+            co_occurrences[word][words[j]] += 1
+unique_words = list(set(words))
+print ("unique words size", len(unique_words))
 
 # co_matrix = csr_matrix((len(unique_words), len(unique_words)), dtype=np.int8)
 co_matrix = np.zeros((len(unique_words), len(unique_words)), dtype=np.int8)
