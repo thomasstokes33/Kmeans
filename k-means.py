@@ -1,22 +1,18 @@
 #Some code from NLTK.ORG
 
-from urllib import request #import some library
-import nltk, re, pprint
+import nltk
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 nltk.download('stopwords')
 nltk.download('wordnet')
 nltk.download('words')
-from nltk.stem import WordNetLemmatizer
 from sklearn.cluster import KMeans
 from nltk.tokenize import RegexpTokenizer
-from sklearn.feature_extraction.text import CountVectorizer
-
+from sklearn.metrics import silhouette_score
 import pandas as pd
 import numpy as np
 from collections import defaultdict, Counter
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from scipy.sparse import csr_matrix
 # stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french'))
@@ -47,13 +43,9 @@ words = tokens
 frequency = defaultdict(int)
 for word in words:
     frequency[word] +=1
-words = [w for w in words if frequency[w] >= 90 and frequency[w] < 5000 and len(word) > 2]
-
-
+words = [w for w in words if frequency[w] >= 10 and frequency[w] < 5000 and len(word) > 2]
 # Create a list of unique words
 print("words size" , len(words))
-
-
 unique_words = list(set(words))
 print ("unique words size", len(unique_words))
 
@@ -83,7 +75,8 @@ km = KMeans(n_clusters=5)
 km.fit(train_set)
 labels = km.labels_
 print(set(labels))
-
-print(set(km.predict(validation_set)))
+new_labels = km.predict(validation_set)
+silhouette_avg = silhouette_score(validation_set, new_labels)
+print("Silhouette av", silhouette_avg)
 
 #TODO: WHAT IF WE USED A SYMMETRIC MATRIX
