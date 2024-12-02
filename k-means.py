@@ -59,13 +59,13 @@ for i, word in enumerate(words):
 unique_words = list(set(words))
 print ("unique words size", len(unique_words))
 
-# co_matrix = csr_matrix((len(unique_words), len(unique_words)), dtype=np.int8)
-co_matrix = np.zeros((len(unique_words), len(unique_words)), dtype=np.int8)
+# co_matrix = csr_matrix((len(unique_words), len(unique_words)), dtype=np.int16)
+co_matrix = np.zeros((len(unique_words), len(unique_words)), dtype=np.int16)
 
 word_index = {word: idx for idx, word in enumerate(unique_words)}
 for word, neighbors in co_occurrences.items():
     for neighbor, count in neighbors.items():
-        co_matrix[word_index[word]][word_index[neighbor]] = count
+        co_matrix[word_index[word]][word_index[neighbor]] = np.array(count).astype(np.int16)
 
 # Create a DataFrame for better readability
 co_matrix_df = pd.DataFrame(co_matrix, index=unique_words, columns=unique_words)
