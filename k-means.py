@@ -77,15 +77,18 @@ train_validation_set, test_set = train_test_split(co_matrix_df, test_size=0.2, r
 train_set, validation_set = train_test_split(train_validation_set, test_size=0.2, random_state=7)
 silhoutteScores = []
 for k in kValues:
-    print("Trying with value", k)
+    print("Trying with num clusters =", k)
     km = KMeans(n_clusters=k, random_state=42)
     km.fit(train_set)
     labels = km.labels_
     print(set(labels))
     new_labels = km.predict(validation_set)
-    silhouette_val = silhouette_score(validation_set, new_labels)
-    print("Silhouette score", silhouette_val)
-    silhoutteScores.append(silhouette_val)
+    if (len(new_labels)>= 2):
+        silhouette_val = silhouette_score(validation_set, new_labels)
+        print("Silhouette score", silhouette_val)
+        silhoutteScores.append(silhouette_val)
+    else:
+        print("Infufficient number of labels")
 plt.plot(kValues,silhoutteScores)
 plt.title("Silhoutte scores")
 plt.xlabel("K value")
