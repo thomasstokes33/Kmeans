@@ -72,6 +72,7 @@ for word, neighbors in co_occurrences.items():
 
 # Create a DataFrame for better readability
 co_matrix_df = pd.DataFrame(co_matrix, index=unique_words, columns=unique_words)
+co_matrix_df.to_pickle("./MLT/cwk/co_matrix.pkl")
 print("Splitting into training and validation")
 train_validation_set, test_set = train_test_split(co_matrix_df, test_size=0.2, random_state=7)
 train_set, validation_set = train_test_split(train_validation_set, test_size=0.2, random_state=7)
