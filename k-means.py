@@ -76,6 +76,7 @@ print("Splitting into training and validation")
 train_validation_set, test_set = train_test_split(co_matrix_df, test_size=0.2, random_state=7)
 train_set, validation_set = train_test_split(train_validation_set, test_size=0.2, random_state=7)
 silhoutteScores = []
+inertias = []
 for k in kValues:
     print("Trying with num clusters =", k)
     km = KMeans(n_clusters=k, random_state=42)
@@ -83,14 +84,23 @@ for k in kValues:
     labels = km.labels_
     print(set(labels))
     new_labels = km.predict(validation_set)
-    if (len(new_labels)>= 2):
+    inertia = km.inertia_
+    if (len(set(new_labels))>= 2):
         silhouette_val = silhouette_score(validation_set, new_labels)
         print("Silhouette score", silhouette_val)
         silhoutteScores.append(silhouette_val)
+        inertias.append(inertia)
     else:
         print("Infufficient number of labels")
+plt.subplot(1, 2, 1)
 plt.plot(kValues,silhoutteScores)
 plt.title("Silhoutte scores")
 plt.xlabel("K value")
 plt.ylabel("Silhoutte score")
+plt.subplot(1, 2, 2)
+plt.xlabel("K value")
+plt.ylabel("Inertia")
+# plt.scatter(validation_set.iloc[:, 0], validation_set.iloc[:, 1], c=new_labels) # selects column 0 (all rows) as x coords and column 1 (all rows) as y. and then cluster labels.
+plt.plot(kValues, inertias)
+plt.title("Elbow method")
 plt.show()
