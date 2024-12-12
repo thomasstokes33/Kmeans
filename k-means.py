@@ -21,7 +21,6 @@ kValues= [4,5,6,20,35,45,55,150]
 MINIMUM_WORD_FREQUENCY = 10
 WINDOW_SIZE = 2 #How many words in sequence to consider to be in the window (either side)
 # stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french'))
-# englishWords = set(nltk.corpus.words.words())
 # filename = "MLT/cwk/text8"
 # raw = open(filename).read()
 
@@ -31,7 +30,6 @@ WINDOW_SIZE = 2 #How many words in sequence to consider to be in the window (eit
 # tokens = tokenizer.tokenize(raw)
 # print("tokens type:", type(tokens))
 # words = [w.lower() for w in tokens if not w.lower() in stop_words] # removes doesn and t and s, and words such as the.
-# # words = [w for w in words if w in englishWords]
 # print("size (stop words removed):", len(words))
 
 # lemmatizer = WordNetLemmatizer()
