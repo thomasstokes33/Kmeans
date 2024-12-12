@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split
 from scipy.sparse import csr_matrix
 import matplotlib.pyplot as plt
 from nltk.stem import WordNetLemmatizer
-kValues= [9,10,11,12,13,14]
+kValues= [3,4,5,6,7,8,9,10]
 # stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french'))
 # englishWords = set(nltk.corpus.words.words())
 # filename = "MLT/cwk/text8"
@@ -46,7 +46,7 @@ words = tokens
 frequency = defaultdict(int)
 for word in words:
     frequency[word] +=1
-words = [w for w in words if frequency[w] >= 10 and frequency[w] < 5000 and len(word) > 2]
+newWords = [w for w in words if frequency[w] >= 10 and frequency[w] < 5000 and len(word) > 2]
 # Create a list of unique words
 print("words size" , len(words))
 
@@ -55,11 +55,12 @@ print("words size" , len(words))
 window_size = 2 #How many words in sequence to consider to be in the window (either side)
 # Create a list of co-occurring word pairs
 co_occurrences = defaultdict(Counter) # creates dict with default value as a Counter.
-for i, word in enumerate(words):
-    for j in range(max(0, i - window_size), min(len(words), i + window_size + 1)):
+print("Length of words:", len(newWords))
+for i, word in enumerate(newWords):
+    for j in range(max(0, i - window_size), min(len(newWords), i + window_size + 1)):
         if i != j:
-            co_occurrences[word][words[j]] += 1
-unique_words = list(set(words))
+            co_occurrences[word][newWords[j]] += 1
+unique_words = list(set(newWords))
 print ("unique words size", len(unique_words))
 
 # co_matrix = csr_matrix((len(unique_words), len(unique_words)), dtype=np.int16)
