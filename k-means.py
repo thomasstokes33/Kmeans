@@ -27,7 +27,7 @@ WINDOW_SIZE = 2 #How many words in sequence to consider to be in the window (eit
 
 # print("type of raw:", type(raw)) #what is the type of the variable
 # print("raw length", len(raw)) #what is the length of the text file, number of words
-# tokenizer = RegexpTokenizer(r'[a-z]+[a-z]+')
+# tokenizer = RegexpTokenizer(r'[a-z]+')
 # tokens = tokenizer.tokenize(raw)
 # print("tokens type:", type(tokens))
 # words = [w.lower() for w in tokens if not w.lower() in stop_words] # removes doesn and t and s, and words such as the.
@@ -44,7 +44,7 @@ print(" Window Size:", WINDOW_SIZE)
 print(" Frequency boundaries:", MINIMUM_WORD_FREQUENCY)
 filename = "MLT/cwk/lemmatized.txt"
 raw = open(filename).read()
-tokenizer = RegexpTokenizer(r'[a-z]+[a-z]+')
+tokenizer = RegexpTokenizer(r'[a-z]+')
 tokens = tokenizer.tokenize(raw)
 words = tokens
 frequency = defaultdict(int)
@@ -58,11 +58,13 @@ print("words size" , len(words))
 #Let's build cooccurrence counts
 # Create a list of co-occurring word pairs
 co_occurrences = defaultdict(Counter) # creates dict with default value as a Counter.
+newWordsSet = set(newWords)
 print("Length of words:", len(newWords))
-for i, word in enumerate(newWords):
-    for j in range(max(0, i - WINDOW_SIZE), min(len(newWords), i + WINDOW_SIZE + 1)):
-        if i != j:
-            co_occurrences[word][newWords[j]] += 1
+for i, word in enumerate(words):
+    if word in newWordsSet:
+        for j in range(max(0, i - WINDOW_SIZE), min(len(words), i + WINDOW_SIZE + 1)):
+            if i != j and words[j] in newWordsSet:
+                co_occurrences[word][words[j]] += 1
 unique_words = list(set(newWords))
 print ("unique words size", len(unique_words))
 
