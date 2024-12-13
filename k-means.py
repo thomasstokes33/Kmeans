@@ -17,14 +17,15 @@ from sklearn.model_selection import train_test_split
 from scipy.sparse import csr_matrix
 import matplotlib.pyplot as plt
 from nltk.stem import WordNetLemmatizer
-
+import csv
 
 def clearFile(filename):
     open(filename,"w").close()
 
-def writeToFile(filename, value):
-    with open(filename, "a+") as file:
-        file.write(str(value) + ",")
+def writeToFile(filename, row):
+    with open(filename, "w+", newline='') as file:
+        csv_writer = csv.writer(file)
+        csv_writer.writerow(row)
 
 
 def clearFiles():
@@ -116,9 +117,9 @@ for k in kValues:
         silhoutteScores.append(silhouette_val)
         inertias.append(inertia)
         testedKValues.append(k)
-        writeToFile("./MLT/cwk/silhouttes.txt", silhouette_val)
-        writeToFile("./MLT/cwk/inertias.txt", inertia)
-        writeToFile("./MLT/cwk/kValue.txt", k)
+        writeToFile("./MLT/cwk/silhouttes.txt", silhoutteScores)
+        writeToFile("./MLT/cwk/inertias.txt", inertias)
+        writeToFile("./MLT/cwk/kValue.txt", testedKValues)
         # write k to file for when there are an sufficient num of labels
     else:
         print("Insufficient number of labels")

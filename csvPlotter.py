@@ -6,7 +6,7 @@ def readCsv(filename):
     with open(filename, "r+") as file:
         csv_reader = csv.reader(file)
         print(csv_reader)
-        rows = list(csv_reader)[0][0:-1] # -1 removes trailing comma
+        rows = list(csv_reader)[0]
         return np.asarray(rows,dtype=float)
 
 
