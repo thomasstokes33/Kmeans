@@ -14,9 +14,10 @@ inertias = readCsv("./MLT/cwk/inertias.txt")
 print("inertias", inertias)
 silhouettes = readCsv("./MLT/cwk/silhouttes.txt")
 print("silhouttes", silhouettes)
-
 kValues = readCsv("./MLT/cwk/kValue.txt")
-fig = plt.figure(figsize=(3,6))
+print("KValues", kValues)
+
+fig = plt.figure(figsize=(11,6))
 plt.subplot(1, 2, 1)
 plt.plot(kValues, silhouettes[0:len(kValues)])
 plt.title("Silhoutte scores")
