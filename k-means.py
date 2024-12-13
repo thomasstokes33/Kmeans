@@ -41,7 +41,7 @@ raw = open(filename).read()
 
 print("type of raw:", type(raw)) #what is the type of the variable
 print("raw length", len(raw)) #what is the length of the text file, number of words
-tokenizer = RegexpTokenizer(r'[a-z]+')
+tokenizer = RegexpTokenizer(r'[a-z]+[a-z]+')
 tokens = tokenizer.tokenize(raw)
 print("tokens type:", type(tokens))
 words = [w.lower() for w in tokens if not w.lower() in stop_words] # removes doesn and t and s, and words such as the.
@@ -57,7 +57,7 @@ print(" Window Size:", WINDOW_SIZE)
 print(" Frequency boundaries:", MINIMUM_WORD_FREQUENCY)
 filename = "MLT/cwk/lemmatized.txt"
 raw = open(filename).read()
-tokenizer = RegexpTokenizer(r'[a-z]+')
+tokenizer = RegexpTokenizer(r'[a-z]+[a-z]+')
 tokens = tokenizer.tokenize(raw)
 words = tokens
 frequency = defaultdict(int)
