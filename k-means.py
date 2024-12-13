@@ -99,6 +99,7 @@ train_set, validation_set = train_test_split(train_validation_set, test_size=0.2
 silhoutteScores = []
 inertias = []
 testedKValues = []
+clearFiles()
 for k in kValues:
     print("Trying with num clusters =", k)
     km = KMeans(n_clusters=k, random_state=42)
@@ -109,11 +110,18 @@ for k in kValues:
     inertia = km.inertia_
     if (len(set(new_labels))>= 2):
         silhouette_val = silhouette_score(validation_set, new_labels)
+        print("Results for k =", k)
         print("Silhouette score", silhouette_val)
+        print("Inertia", inertia)
         silhoutteScores.append(silhouette_val)
         inertias.append(inertia)
         testedKValues.append(k)
+        writeToFile("./MLT/cwk/silhouttes.txt", silhouette_val)
+        writeToFile("./MLT/cwk/inertias.txt", inertia)
+        writeToFile("./MLT/cwk/kValue.txt", k)
+        # write k to file for when there are an sufficient num of labels
     else:
+        print("Insufficient number of labels")
 fig = plt.figure(figsize=(8,6))
 plt.subplot(1, 2, 1)
 plt.plot(testedKValues,silhoutteScores)
