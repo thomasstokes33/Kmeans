@@ -18,6 +18,7 @@ from scipy.sparse import csr_matrix
 import matplotlib.pyplot as plt
 from nltk.stem import WordNetLemmatizer
 import csv
+from sklearn.model_selection import KFold
 
 def clearFile(filename):
     open(filename,"w").close()
@@ -103,27 +104,41 @@ testedKValues = []
 clearFiles()
 for k in kValues:
     print("Trying with num clusters =", k)
-    km = KMeans(n_clusters=k, random_state=42)
-    km.fit(train_set)
-    labels = km.labels_
-    print(set(labels))
-    new_labels = km.predict(validation_set)
-    inertia = km.inertia_
-    if (len(set(new_labels))>= 2):
-        silhouette_val = silhouette_score(validation_set, new_labels)
-        print("Results for k =", k)
-        print("Silhouette score", silhouette_val)
-        print("Inertia", inertia)
-        silhoutteScores.append(silhouette_val)
-        inertias.append(inertia)
-        testedKValues.append(k)
-        writeToFile("./MLT/cwk/silhouttes.txt", silhoutteScores)
-        writeToFile("./MLT/cwk/inertias.txt", inertias)
-        writeToFile("./MLT/cwk/kValue.txt", testedKValues)
-        # write k to file for when there are an sufficient num of labels
-    else:
-        print("Insufficient number of labels")
-fig = plt.figure(figsize=(8,6))
+    tempSilhouttes = []
+    tempInertias = []
+    for seed in range(42,45,2):
+        print("Seed:",seed)
+        kf = KFold(n_splits=2)
+        for train_index, test_index in kf.split(train_validation_set):
+            print(train_index, test_index)
+            train_set, validation_set = train_validation_set.iloc[train_index], train_validation_set.iloc[test_index]
+            km = KMeans(n_clusters=k, random_state=seed)
+            km.fit(train_set)
+            labels = km.labels_
+            print(set(labels))
+            new_labels = km.predict(validation_set)
+            inertia = km.inertia_
+            if (len(set(new_labels))>= 2):
+                silhouette_val = silhouette_score(validation_set, new_labels)
+                tempSilhouttes.append(silhouette_val)
+                tempInertias.append(inertia)
+                # write k to file for when there are an sufficient num of labels
+            else:
+                print("Insufficient number of labels")
+    averageInertia = sum(tempInertias)/len(tempInertias)
+    averageSilhouette = sum(tempSilhouttes)/len(tempSilhouttes)
+    print("Results for k =", k)
+    print("Silhouette score", averageSilhouette)
+    print("Inertia", averageInertia)
+    inertias.append(averageInertia)
+    silhoutteScores.append(averageSilhouette)
+    testedKValues.append(k)
+    writeToFile("./MLT/cwk/silhouttes.txt", silhoutteScores)
+    writeToFile("./MLT/cwk/inertias.txt", inertias)
+    writeToFile("./MLT/cwk/kValue.txt", testedKValues)
+
+
+fig = plt.figure(figsize=(10,6))
 plt.subplot(1, 2, 1)
 plt.plot(testedKValues,silhoutteScores)
 plt.title("Silhoutte scores")
