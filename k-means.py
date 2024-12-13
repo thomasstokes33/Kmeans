@@ -34,7 +34,7 @@ WINDOW_SIZE = 2 #How many words in sequence to consider to be in the window (eit
 
 # lemmatizer = WordNetLemmatizer()
 # words = [ lemmatizer.lemmatize(w) for w in words ]
-# output = open("MLT/cwk/lematized.txt", "w")
+# output = open("MLT/cwk/lemmatized.txt", "w")
 # output.write(" ".join(words))
 # output.close()
 print("Hyperparameters are")
@@ -48,7 +48,7 @@ words = tokens
 frequency = defaultdict(int)
 for word in words:
     frequency[word] +=1
-newWords = [w for w in words if frequency[w] >= MINIMUM_WORD_FREQUENCY  and len(word) > 2]
+newWords = [w for w in words if frequency[w] >= MINIMUM_WORD_FREQUENCY  and len(w) > 2]
 # Create a list of unique words
 print("words size" , len(words))
 
@@ -57,7 +57,7 @@ print("words size" , len(words))
 # Create a list of co-occurring word pairs
 co_occurrences = defaultdict(Counter) # creates dict with default value as a Counter.
 newWordsSet = set(newWords)
-print("Length of words:", len(newWords))
+print("Length of new words:", len(newWords))
 for i, word in enumerate(words):
     if word in newWordsSet:
         for j in range(max(0, i - WINDOW_SIZE), min(len(words), i + WINDOW_SIZE + 1)):
