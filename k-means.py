@@ -25,7 +25,14 @@ def clearFile(filename):
 def writeToFile(filename, value):
     with open(filename, "a+") as file:
         file.write(str(value) + ",")
-        
+
+
+def clearFiles():
+    clearFile("./MLT/cwk/inertias.txt")
+    clearFile("./MLT/cwk/silhouttes.txt")
+    clearFile("./MLT/cwk/kValue.txt")
+
+
 MINIMUM_WORD_FREQUENCY = 10
 WINDOW_SIZE = 2 #How many words in sequence to consider to be in the window (either side)
 # stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french'))
