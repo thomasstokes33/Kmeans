@@ -17,7 +17,15 @@ from sklearn.model_selection import train_test_split
 from scipy.sparse import csr_matrix
 import matplotlib.pyplot as plt
 from nltk.stem import WordNetLemmatizer
-kValues= [4,5,6,20,35,45,55,150]
+
+
+def clearFile(filename):
+    open(filename,"w").close()
+
+def writeToFile(filename, value):
+    with open(filename, "a+") as file:
+        file.write(str(value) + ",")
+        
 MINIMUM_WORD_FREQUENCY = 10
 WINDOW_SIZE = 2 #How many words in sequence to consider to be in the window (either side)
 # stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french'))
@@ -31,10 +39,10 @@ WINDOW_SIZE = 2 #How many words in sequence to consider to be in the window (eit
 # print("tokens type:", type(tokens))
 # words = [w.lower() for w in tokens if not w.lower() in stop_words] # removes doesn and t and s, and words such as the.
 # print("size (stop words removed):", len(words))
-
+# print("Lemmatizing")
 # lemmatizer = WordNetLemmatizer()
 # words = [ lemmatizer.lemmatize(w) for w in words ]
-# output = open("MLT/cwk/lemmatized.txt", "w")
+# output = open("./MLT/cwk/lemmatized.txt", "w")
 # output.write(" ".join(words))
 # output.close()
 print("Hyperparameters are")
