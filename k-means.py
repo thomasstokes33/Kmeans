@@ -35,23 +35,23 @@ def clearFiles():
 
 MINIMUM_WORD_FREQUENCY = 10
 WINDOW_SIZE = 2 #How many words in sequence to consider to be in the window (either side)
-# stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french'))
-# filename = "MLT/cwk/text8"
-# raw = open(filename).read()
+stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french'))
+filename = "MLT/cwk/text8"
+raw = open(filename).read()
 
-# print("type of raw:", type(raw)) #what is the type of the variable
-# print("raw length", len(raw)) #what is the length of the text file, number of words
-# tokenizer = RegexpTokenizer(r'[a-z]+')
-# tokens = tokenizer.tokenize(raw)
-# print("tokens type:", type(tokens))
-# words = [w.lower() for w in tokens if not w.lower() in stop_words] # removes doesn and t and s, and words such as the.
-# print("size (stop words removed):", len(words))
-# print("Lemmatizing")
-# lemmatizer = WordNetLemmatizer()
-# words = [ lemmatizer.lemmatize(w) for w in words ]
-# output = open("./MLT/cwk/lemmatized.txt", "w")
-# output.write(" ".join(words))
-# output.close()
+print("type of raw:", type(raw)) #what is the type of the variable
+print("raw length", len(raw)) #what is the length of the text file, number of words
+tokenizer = RegexpTokenizer(r'[a-z]+')
+tokens = tokenizer.tokenize(raw)
+print("tokens type:", type(tokens))
+words = [w.lower() for w in tokens if not w.lower() in stop_words] # removes doesn and t and s, and words such as the.
+print("size (stop words removed):", len(words))
+print("Lemmatizing")
+lemmatizer = WordNetLemmatizer()
+words = [ lemmatizer.lemmatize(w) for w in words ]
+output = open("./MLT/cwk/lemmatized.txt", "w")
+output.write(" ".join(words))
+output.close()
 print("Hyperparameters are")
 print(" Window Size:", WINDOW_SIZE)
 print(" Frequency boundaries:", MINIMUM_WORD_FREQUENCY)
