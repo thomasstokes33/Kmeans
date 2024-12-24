@@ -1,5 +1,4 @@
 #Some code from NLTK.ORG
-
 import nltk
 from nltk import word_tokenize
 from nltk.corpus import stopwords
@@ -19,6 +18,8 @@ import matplotlib.pyplot as plt
 from nltk.stem import WordNetLemmatizer
 import csv
 from sklearn.model_selection import KFold
+from sklearn.metrics import davies_bouldin_score
+from sklearn import metrics
 
 def clearFile(filename):
     open(filename,"w").close()
@@ -33,27 +34,30 @@ def clearFiles():
     clearFile("./MLT/cwk/inertias.txt")
     clearFile("./MLT/cwk/silhouttes.txt")
     clearFile("./MLT/cwk/kValue.txt")
+    clearFile("./MLT/cwk/davies.txt")
+    clearFile("./MLT/cwk/calinski.txt")
 
 
-MINIMUM_WORD_FREQUENCY = 10
-WINDOW_SIZE = 2 #How many words in sequence to consider to be in the window (either side)
-stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french'))
-filename = "MLT/cwk/text8"
-raw = open(filename).read()
+kValues= [3,4,5,6,7,8,9,10,11,20,30]
+MINIMUM_WORD_FREQUENCY = 15
+WINDOW_SIZE = 3 #How many words in sequence to consider to be in the window (either side)
+# stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french'))
+# filename = "MLT/cwk/text8"
+# raw = open(filename).read()
 
-print("type of raw:", type(raw)) #what is the type of the variable
-print("raw length", len(raw)) #what is the length of the text file, number of words
-tokenizer = RegexpTokenizer(r'[a-z]+[a-z]+')
-tokens = tokenizer.tokenize(raw)
-print("tokens type:", type(tokens))
-words = [w.lower() for w in tokens if not w.lower() in stop_words] # removes doesn and t and s, and words such as the.
-print("size (stop words removed):", len(words))
-print("Lemmatizing")
-lemmatizer = WordNetLemmatizer()
-words = [ lemmatizer.lemmatize(w) for w in words ]
-output = open("./MLT/cwk/lemmatized.txt", "w")
-output.write(" ".join(words))
-output.close()
+# print("type of raw:", type(raw)) #what is the type of the variable
+# print("raw length", len(raw)) #what is the length of the text file, number of words
+# tokenizer = RegexpTokenizer(r'[a-z]+[a-z]+')
+# tokens = tokenizer.tokenize(raw)
+# print("tokens type:", type(tokens))
+# words = [w.lower() for w in tokens if not w.lower() in stop_words] # removes doesn and t and s, and words such as the.
+# print("size (stop words removed):", len(words))
+# print("Lemmatizing")
+# lemmatizer = WordNetLemmatizer()
+# words = [ lemmatizer.lemmatize(w) for w in words ]
+# output = open("./MLT/cwk/lemmatized.txt", "w")
+# output.write(" ".join(words))
+# output.close()
 print("Hyperparameters are")
 print(" Window Size:", WINDOW_SIZE)
 print(" Frequency boundaries:", MINIMUM_WORD_FREQUENCY)
@@ -101,11 +105,15 @@ train_set, validation_set = train_test_split(train_validation_set, test_size=0.2
 silhoutteScores = []
 inertias = []
 testedKValues = []
+daviesValues = []
+calinskiValues = []
 clearFiles()
 for k in kValues:
     print("Trying with num clusters =", k)
     tempSilhouttes = []
     tempInertias = []
+    tempCalinski = []
+    tempDavies = []
     for seed in range(42,45,2):
         print("Seed:",seed)
         kf = KFold(n_splits=2)
@@ -122,33 +130,54 @@ for k in kValues:
                 silhouette_val = silhouette_score(validation_set, new_labels)
                 tempSilhouttes.append(silhouette_val)
                 tempInertias.append(inertia)
+                tempDavies.append(davies_bouldin_score(validation_set, new_labels))
+                tempCalinski.append(metrics.calinski_harabasz_score(validation_set, new_labels))
                 # write k to file for when there are an sufficient num of labels
             else:
                 print("Insufficient number of labels")
     averageInertia = sum(tempInertias)/len(tempInertias)
     averageSilhouette = sum(tempSilhouttes)/len(tempSilhouttes)
+    averageCalinksi = sum(tempCalinski)/len(tempCalinski)
+    averageDavies = sum(tempDavies)/len(tempDavies)
     print("Results for k =", k)
     print("Silhouette score", averageSilhouette)
     print("Inertia", averageInertia)
+    print("Calinski Harabasz score", averageCalinksi)
+    print("Davies Bouldin score", averageDavies)
+
     inertias.append(averageInertia)
     silhoutteScores.append(averageSilhouette)
     testedKValues.append(k)
+    calinskiValues.append(averageCalinksi)
+    daviesValues.append(averageDavies)
     writeToFile("./MLT/cwk/silhouttes.txt", silhoutteScores)
     writeToFile("./MLT/cwk/inertias.txt", inertias)
     writeToFile("./MLT/cwk/kValue.txt", testedKValues)
+    writeToFile("./MLT/cwk/davies.txt", daviesValues)
+    writeToFile("./MLT/cwk/calinski.txt", calinskiValues)
 
 
 fig = plt.figure(figsize=(10,6))
-plt.subplot(1, 2, 1)
+plt.subplot(2, 2, 1)
 plt.plot(testedKValues,silhoutteScores)
 plt.title("Silhoutte scores")
 plt.xlabel("K value")
 plt.ylabel("Silhoutte score")
-plt.subplot(1, 2, 2)
+plt.subplot(2, 2, 2)
+plt.plot(testedKValues, inertias)
+plt.title("Elbow method")
 plt.xlabel("K value")
 plt.ylabel("Inertia")
 # plt.scatter(validation_set.iloc[:, 0], validation_set.iloc[:, 1], c=new_labels) # selects column 0 (all rows) as x coords and column 1 (all rows) as y. and then cluster labels.
-plt.plot(testedKValues, inertias)
-plt.title("Elbow method")
+plt.subplot(2,2,3)
+plt.title("Davies Bouldin score")
+plt.xlabel("K value")
+plt.ylabel("Davies Bouldin score")
+plt.plot(testedKValues, daviesValues)
+plt.subplot(2,2,4)
+plt.title("Calinski Harabasz score")
+plt.xlabel("K value")
+plt.ylabel("Calinski Harabasz score")
+plt.plot(testedKValues, calinskiValues)
 plt.savefig("./MLT/cwk/evaluation.png", dpi=fig.dpi)
 plt.show()
