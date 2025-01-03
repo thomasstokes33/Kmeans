@@ -20,6 +20,7 @@ import csv
 from sklearn.model_selection import KFold
 from sklearn.metrics import davies_bouldin_score
 from sklearn import metrics
+from scipy.stats import iqr
 
 def clearFile(filename):
     open(filename,"w").close()
@@ -32,14 +33,14 @@ def writeToFile(filename, row):
 
 def clearFiles():
     clearFile("./MLT/cwk/inertias.txt")
-    clearFile("./MLT/cwk/silhouttes.txt")
+    clearFile("./MLT/cwk/silhouettes.txt")
     clearFile("./MLT/cwk/kValue.txt")
     clearFile("./MLT/cwk/davies.txt")
     clearFile("./MLT/cwk/calinski.txt")
 
 
 kValues= [3,4,5,6,7,8,9,10,11,20,30]
-MINIMUM_WORD_FREQUENCY = 15
+MINIMUM_WORD_FREQUENCY = 50
 WINDOW_SIZE = 3 #How many words in sequence to consider to be in the window (either side)
 # stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french'))
 # filename = "MLT/cwk/text8"
@@ -102,7 +103,7 @@ co_matrix_df = pd.read_pickle("./MLT/cwk/co_matrix.pkl")
 print("Splitting into training and validation")
 train_validation_set, test_set = train_test_split(co_matrix_df, test_size=0.2, random_state=7)
 train_set, validation_set = train_test_split(train_validation_set, test_size=0.2, random_state=7)
-silhoutteScores = []
+silhouetteScores = []
 inertias = []
 testedKValues = []
 daviesValues = []
@@ -110,11 +111,11 @@ calinskiValues = []
 clearFiles()
 for k in kValues:
     print("Trying with num clusters =", k)
-    tempSilhouttes = []
+    tempSilhouettes = []
     tempInertias = []
     tempCalinski = []
     tempDavies = []
-    for seed in range(42,45,2):
+    for seed in range(42,51,4):
         print("Seed:",seed)
         kf = KFold(n_splits=2)
         for train_index, test_index in kf.split(train_validation_set):
@@ -128,41 +129,53 @@ for k in kValues:
             inertia = km.inertia_
             if (len(set(new_labels))>= 2):
                 silhouette_val = silhouette_score(validation_set, new_labels)
-                tempSilhouttes.append(silhouette_val)
+                tempSilhouettes.append(silhouette_val)
                 tempInertias.append(inertia)
                 tempDavies.append(davies_bouldin_score(validation_set, new_labels))
                 tempCalinski.append(metrics.calinski_harabasz_score(validation_set, new_labels))
                 # write k to file for when there are an sufficient num of labels
             else:
                 print("Insufficient number of labels")
-    averageInertia = sum(tempInertias)/len(tempInertias)
-    averageSilhouette = sum(tempSilhouttes)/len(tempSilhouttes)
-    averageCalinksi = sum(tempCalinski)/len(tempCalinski)
-    averageDavies = sum(tempDavies)/len(tempDavies)
-    print("Results for k =", k)
-    print("Silhouette score", averageSilhouette)
-    print("Inertia", averageInertia)
-    print("Calinski Harabasz score", averageCalinksi)
-    print("Davies Bouldin score", averageDavies)
+    tempSilhouettes = np.array(tempSilhouettes)
+    silhouetteIQR = iqr(tempSilhouettes)
+    silhouetteQuartile1 = np.percentile(tempSilhouettes, 25)
+    silhouetteQuartile3 = np.percentile(tempSilhouettes, 75)
+    silhouetteScaledIQR = 1.5 * iqr(tempSilhouettes)
+    indexesToDrop = np.where((tempSilhouettes < silhouetteQuartile1 - silhouetteScaledIQR) | (tempSilhouettes > silhouetteQuartile3 + silhouetteScaledIQR))[0]
+    tempSilhouettes = np.delete(tempSilhouettes, indexesToDrop)
+    tempInertias = np.delete(tempInertias, indexesToDrop)
+    tempCalinski = np.delete(tempCalinski,indexesToDrop)
+    tempDavies = np.delete(tempDavies, indexesToDrop)
+    if len(tempSilhouettes) > 0:
+        averageInertia = sum(tempInertias)/len(tempInertias)
+        averageSilhouette = sum(tempSilhouettes)/len(tempSilhouettes)
+        averageCalinksi = sum(tempCalinski)/len(tempCalinski)
+        averageDavies = sum(tempDavies)/len(tempDavies)
+        print("Results for k =", k)
+        print("Silhouette score", averageSilhouette)
+        print("Inertia", averageInertia)
+        print("Calinski Harabasz score", averageCalinksi)
+        print("Davies Bouldin score", averageDavies)
 
-    inertias.append(averageInertia)
-    silhoutteScores.append(averageSilhouette)
-    testedKValues.append(k)
-    calinskiValues.append(averageCalinksi)
-    daviesValues.append(averageDavies)
-    writeToFile("./MLT/cwk/silhouttes.txt", silhoutteScores)
-    writeToFile("./MLT/cwk/inertias.txt", inertias)
-    writeToFile("./MLT/cwk/kValue.txt", testedKValues)
-    writeToFile("./MLT/cwk/davies.txt", daviesValues)
-    writeToFile("./MLT/cwk/calinski.txt", calinskiValues)
-
+        inertias.append(averageInertia)
+        silhouetteScores.append(averageSilhouette)
+        testedKValues.append(k)
+        calinskiValues.append(averageCalinksi)
+        daviesValues.append(averageDavies)
+        writeToFile("./MLT/cwk/silhouettes.txt", silhouetteScores)
+        writeToFile("./MLT/cwk/inertias.txt", inertias)
+        writeToFile("./MLT/cwk/kValue.txt", testedKValues)
+        writeToFile("./MLT/cwk/davies.txt", daviesValues)
+        writeToFile("./MLT/cwk/calinski.txt", calinskiValues)
+    else:
+        print("All outliers")
 
 fig = plt.figure(figsize=(10,6))
 plt.subplot(2, 2, 1)
-plt.plot(testedKValues,silhoutteScores)
-plt.title("Silhoutte scores")
+plt.plot(testedKValues,silhouetteScores)
+plt.title("Silhouette scores")
 plt.xlabel("K value")
-plt.ylabel("Silhoutte score")
+plt.ylabel("Silhouette score")
 plt.subplot(2, 2, 2)
 plt.plot(testedKValues, inertias)
 plt.title("Elbow method")
