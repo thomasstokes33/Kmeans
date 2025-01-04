@@ -1,3 +1,6 @@
+# This script preproccess a dataset and plots increasing values of K used for the K-Means model
+# against the result of 4 evaluation methods on the model.
+
 #Import NLTK used for tokenisation and stop words
 import nltk
 from nltk import word_tokenize

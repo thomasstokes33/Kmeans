@@ -1,3 +1,4 @@
+# A script to plot the CSV data whilst the model fitting and predicting is still running, using the backup files.
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
