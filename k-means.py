@@ -32,7 +32,12 @@ def writeToFile(filename, row):
     with open(filename, "w+", newline='') as file:
         csv_writer = csv.writer(file)
         csv_writer.writerow(row)
-
+def readCsv(filename):
+    with open(filename, "r+") as file:
+        csv_reader = csv.reader(file)
+        print(csv_reader)
+        rows = list(csv_reader)[0]
+        return rows
 
 def clearFiles():
     clearFile("./MLT/cwk/inertias.txt")
@@ -41,10 +46,20 @@ def clearFiles():
     clearFile("./MLT/cwk/davies.txt")
     clearFile("./MLT/cwk/calinski.txt")
 
+# Takes an array 
+def removeOutliers(array):
+    dataIQR = iqr(array)
+    quartile1 = np.percentile(array, 25)
+    quartile3 = np.percentile(array, 75)
+    scaledIQR = 1.5 * dataIQR
+    indexesToDrop = np.where((array < quartile1 - scaledIQR) | (array > quartile3 + scaledIQR))[0]
+    array = np.delete(array, indexesToDrop)
+    print(indexesToDrop) 
+    return array
 
-kValues= [3,4,5,6,7,8,9, 10,11, 12, 15, 20, 25, 30]
+kValues= [2,3,4,5,6,7,8,9, 10,11, 12, 15, 20, 25, 30]
 MINIMUM_WORD_FREQUENCY = 20
-WINDOW_SIZE = 2 # The number of words to compare with the current word in the sequence(either side).
+WINDOW_SIZE = 4 # The number of words to compare with the current word in the sequence(either side).
 stop_words = set(stopwords.words('english')).union(set(stopwords.words('german'))).union(stopwords.words('spanish')).union(stopwords.words('french')) # Create stopwords set for multiple languages
 filename = "MLT/cwk/text8"
 raw = open(filename).read()
@@ -140,17 +155,11 @@ for k in kValues:
             else:
                 print("Insufficient number of labels")
     # Remove outliers
-    tempSilhouettes = np.array(tempSilhouettes)
-    silhouetteIQR = iqr(tempSilhouettes)
-    silhouetteQuartile1 = np.percentile(tempSilhouettes, 25)
-    silhouetteQuartile3 = np.percentile(tempSilhouettes, 75)
-    silhouetteScaledIQR = 1.5 * iqr(tempSilhouettes)
-    indexesToDrop = np.where((tempSilhouettes < silhouetteQuartile1 - silhouetteScaledIQR) | (tempSilhouettes > silhouetteQuartile3 + silhouetteScaledIQR))[0]
-    tempSilhouettes = np.delete(tempSilhouettes, indexesToDrop)
-    tempInertias = np.delete(tempInertias, indexesToDrop)
-    tempCalinski = np.delete(tempCalinski,indexesToDrop)
-    tempDavies = np.delete(tempDavies, indexesToDrop)
-    if len(tempSilhouettes) > 0: # If there are values left, average the evaluation scores, for a given k.
+    tempSilhouettes = removeOutliers(tempSilhouettes)
+    tempInertias = removeOutliers(tempInertias)
+    tempCalinski = removeOutliers(tempCalinski)
+    tempDavies = removeOutliers(tempDavies)
+    if len(tempSilhouettes) > 0 and len(tempInertias) > 0 and len(tempCalinski) > 0 and len(tempDavies) >0: # If there are values left, average the evaluation scores, for a given k.
         averageInertia = sum(tempInertias)/len(tempInertias)
         averageSilhouette = sum(tempSilhouettes)/len(tempSilhouettes)
         averageCalinksi = sum(tempCalinski)/len(tempCalinski)
@@ -198,4 +207,19 @@ plt.xlabel("K value")
 plt.ylabel("Calinski Harabasz score")
 plt.plot(testedKValues, calinskiValues)
 plt.savefig("./MLT/cwk/evaluation.png", dpi=fig.dpi)
-plt.show()
+# Used to show generalised error.
+km = KMeans(n_clusters=3)
+print("Fitting...")
+km.fit(train_validation_set)
+labels = km.labels_
+# counts = {0: 0, 1:0, 2:0,3:0, 4:0,5:0}
+# c1 = []
+# c2 = []
+# for i in range(len(labels)):
+#     if labels[i]==1:
+#         c1.add(unique_words[i])
+#     counts[labels[i]]+=1
+# print(counts)
+print("Predicting..")
+result_labels = km.predict(test_set)
+print(silhouette_score(test_set,result_labels))
